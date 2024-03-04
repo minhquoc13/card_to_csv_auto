@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Text Converter</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+
+      textarea {
+        width: 100%;
+        height: 100px;
+        margin-bottom: 10px;
+      }
+
+      button {
+        display: block;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="inputTextArea" placeholder="Enter text here..."></textarea>
+    <button onclick="convertText()">Convert</button>
+    <textarea
+      id="outputTextArea"
+      placeholder="Converted text will appear here..."
+      readonly
+    ></textarea>
+
+    <script>
+      function removeExtraCharacters(inputString) {
+        return inputString.replace(/\|\|\|(.*)/g, "").replace(/"/g, "");
+      }
+
+      function convertTextToCSV(inputText) {
+        // Split the text by the pipe (|) delimiter
+        let rows = inputText.split("\n");
+
+        // Split each row by the pipe (|) delimiter and create an array of arrays (CSV format)
+        let csvArray = rows.map((row) => row.split("|"));
+
+        // Convert the array of arrays to a CSV string
+        let csvString = csvArray.map((row) => row.join(",")).join("\n");
+
+        return csvString;
+      }
+
+      function downloadCSV(csvContent, fileName) {
+        var blob = new Blob([csvContent], { type: "text/csv" });
+        var link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+      }
+
+      function convertText() {
+        // Example usage
+        var inputTextArea = document.getElementById("inputTextArea");
+        let inputText = inputTextArea.value;
+        let csvOutput = convertTextToCSV(inputText);
+
+        // Specify the desired file name
+        let fileName = "output.csv";
+
+        // Download the CSV file
+        downloadCSV(csvOutput, fileName);
+      }
+    </script>
+  </body>
+</html>
