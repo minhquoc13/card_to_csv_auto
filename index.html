@@ -1,75 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Text Converter</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Excel</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+
+    <!-- Include the SheetJS library -->
 
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-      }
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-      textarea {
-        width: 100%;
-        height: 100px;
-        margin-bottom: 10px;
-      }
+        textarea {
+            width: 500px;
+            height: 200px;
+        }
 
-      button {
-        display: block;
-        margin-bottom: 10px;
-      }
+        button {
+            margin-top: 10px;
+            padding: 8px;
+            cursor: pointer;
+        }
     </style>
-  </head>
-  <body>
-    <textarea id="inputTextArea" placeholder="Enter text here..."></textarea>
-    <button onclick="convertText()">Convert</button>
-    <textarea
-      id="outputTextArea"
-      placeholder="Converted text will appear here..."
-      readonly
-    ></textarea>
+</head>
+<body>
+
+    <div>
+        <textarea id="inputText" placeholder="Enter text here..."></textarea>
+        <br>
+        <button onclick="onClick()">Convert and Download Excel</button>
+    </div>
 
     <script>
-      function removeExtraCharacters(inputString) {
-        return inputString.replace(/\|\|\|(.*)/g, "").replace(/"/g, "");
-      }
+        const stateMapping = {
+            "AL": "Alabama",
+            "AK": "Alaska",
+            "AS": "American Samoa",
+            "AZ": "Arizona",
+            "AR": "Arkansas",
+            "CA": "California",
+            "CO": "Colorado",
+            "CT": "Connecticut",
+            "DE": "Delaware",
+            "DC": "District Of Columbia",
+            "FM": "Federated States Of Micronesia",
+            "FL": "Florida",
+            "GA": "Georgia",
+            "GU": "Guam",
+            "HI": "Hawaii",
+            "ID": "Idaho",
+            "IL": "Illinois",
+            "IN": "Indiana",
+            "IA": "Iowa",
+            "KS": "Kansas",
+            "KY": "Kentucky",
+            "LA": "Louisiana",
+            "ME": "Maine",
+            "MH": "Marshall Islands",
+            "MD": "Maryland",
+            "MA": "Massachusetts",
+            "MI": "Michigan",
+            "MN": "Minnesota",
+            "MS": "Mississippi",
+            "MO": "Missouri",
+            "MT": "Montana",
+            "NE": "Nebraska",
+            "NV": "Nevada",
+            "NH": "New Hampshire",
+            "NJ": "New Jersey",
+            "NM": "New Mexico",
+            "NY": "New York",
+            "NC": "North Carolina",
+            "ND": "North Dakota",
+            "MP": "Northern Mariana Islands",
+            "OH": "Ohio",
+            "OK": "Oklahoma",
+            "OR": "Oregon",
+            "PW": "Palau",
+            "PA": "Pennsylvania",
+            "PR": "Puerto Rico",
+            "RI": "Rhode Island",
+            "SC": "South Carolina",
+            "SD": "South Dakota",
+            "TN": "Tennessee",
+            "TX": "Texas",
+            "UT": "Utah",
+            "VT": "Vermont",
+            "VI": "Virgin Islands",
+            "VA": "Virginia",
+            "WA": "Washington",
+            "WV": "West Virginia",
+            "WI": "Wisconsin",
+            "WY": "Wyoming"
+        };
 
-      function convertTextToCSV(inputText) {
-        // Split the text by the pipe (|) delimiter
-        let rows = inputText.split("\n");
+        function convertAndInsertStateNames(data) {
+    const lines = data.split('\n');
+    const result = [];
 
-        // Split each row by the pipe (|) delimiter and create an array of arrays (CSV format)
-        let csvArray = rows.map((row) => row.split("|"));
+    lines.forEach(function (line) {
+        const cells = line.split('|');
+        const stateAbbreviation = cells[6].trim();
 
-        // Convert the array of arrays to a CSV string
-        let csvString = csvArray.map((row) => row.join(",")).join("\n");
+        if (stateMapping[stateAbbreviation]) {
+            cells[6] += "|" + stateMapping[stateAbbreviation];
+        } else {
+            cells[6] += "|State Not Found";
+        }
 
-        return csvString;
-      }
+        // Add email suffix to cell[4]
+        const emailSuffix = "@gmail.com";
+        const modifiedLine = cells.join('|') + "|" + cells[4].replace(/\s/g, "") + emailSuffix;
+        result.push(modifiedLine);
+    });
 
-      function downloadCSV(csvContent, fileName) {
-        var blob = new Blob([csvContent], { type: "text/csv" });
-        var link = document.createElement("a");
-        link.href = window.URL.createObjectURL(blob);
-        link.download = fileName;
-        link.click();
-      }
+    return result.join('\n');
+}
 
-      function convertText() {
-        // Example usage
-        var inputTextArea = document.getElementById("inputTextArea");
-        let inputText = inputTextArea.value;
-        let csvOutput = convertTextToCSV(inputText);
 
-        // Specify the desired file name
-        let fileName = "output.csv";
+function convertToXLSX(inputString, outputFileName) {
+    // Split the input string into lines
+    const lines = inputString.trim().split('\n');
 
-        // Download the CSV file
-        downloadCSV(csvOutput, fileName);
-      }
+    // Split each line by '|'
+    const data = lines.map(line => line.split('|'));
+
+    // Create a worksheet
+    const ws = XLSX.utils.aoa_to_sheet(data);
+
+    // Create a workbook with a single sheet
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+    // Save the workbook to an XLSX file
+    XLSX.writeFile(wb, outputFileName);
+
+    console.log(`XLSX file created: ${outputFileName}`);
+}
+
+    function onClick(){
+        var inputText = document.getElementById("inputText").value
+        const modifiedData = convertAndInsertStateNames(inputText);
+        convertToXLSX(modifiedData, 'output.xlsx')
+    }
+
     </script>
-  </body>
+</body>
 </html>
