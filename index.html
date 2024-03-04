@@ -105,6 +105,9 @@
     const lines = data.split('\n');
     const result = [];
 
+    const header = ["STT", "CARD_NUMBER", "DATE", "CVV", "NAME", "COUNTRY", "STATECODE", "STATE", "CITY", "ADD1", "POSTALCODE", "Column12", "Column13", "Column14", "Column15", "Column16", "GMAIL"];
+    result.push(header.join('|'));
+
     lines.forEach(function (line) {
         const cells = line.split('|');
         const stateAbbreviation = cells[6].trim();
@@ -142,7 +145,7 @@ function convertToXLSX(inputString, outputFileName) {
     // Save the workbook to an XLSX file
     XLSX.writeFile(wb, outputFileName);
 
-    console.log(`XLSX file created: ${outputFileName}`);
+    console.log(XLSX file created: ${outputFileName});
 }
 
     function onClick(){
